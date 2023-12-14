@@ -162,6 +162,12 @@ Public Class Contact
         Dim company As New Company()
         Dim associates As List(Of Associate) = GetAssociates()
 
+        If String.IsNullOrEmpty(txtName.Text) AndAlso String.IsNullOrEmpty(txtCnpj.Text) AndAlso (associates Is Nothing OrElse associates.Count = 0) Then
+            ' Nenhum campo preenchido, exibe uma mensagem e sai do método
+            MsgBox("Nenhum campo preenchido. Nenhuma atualização necessária.", MsgBoxStyle.Information, "Aviso")
+            Return
+        End If
+
         company.Id = companyId
         company.Name = txtName.Text
         company.Cnpj = txtCnpj.Text

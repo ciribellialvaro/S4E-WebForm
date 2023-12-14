@@ -7,6 +7,11 @@ Public Class DataLayer
     Public Sub AddAssociate(ByVal associate As Associate)
         Dim associateId As Integer = 0
 
+        If Not IsCpfUnique(associate.Cpf, 0) Then
+            MsgBox("O CPF já está em uso por outro associado.", MsgBoxStyle.Exclamation, "Erro")
+            Return
+        End If
+
         Try
             Using connection As New SqlConnection(connectionString)
                 connection.Open()
@@ -33,8 +38,27 @@ Public Class DataLayer
 
     End Sub
 
+    Public Function IsCpfUnique(ByVal cpf As String, ByVal currentAssociateId As Integer) As Boolean
+        Using connection As New SqlConnection(connectionString)
+            connection.Open()
+
+            Dim query As New SqlCommand("SELECT COUNT(*) FROM T_ASSOC WHERE A_CPF = @Cpf AND ID <> @CurrentId", connection)
+            query.Parameters.AddWithValue("@Cpf", cpf)
+            query.Parameters.AddWithValue("@CurrentId", currentAssociateId)
+
+            Return Convert.ToInt32(query.ExecuteScalar()) = 0
+        End Using
+    End Function
+
+
     Public Sub AddCompany(ByVal company As Company)
         Dim companyId As Integer = 0
+
+        If Not IsCnpjUnique(company.Cnpj, 0) Then
+            MsgBox("O CNPJ já está em uso por outra empresa.", MsgBoxStyle.Exclamation, "Erro")
+            Return
+        End If
+
 
         Try
             Using connection As New SqlConnection(connectionString)
@@ -60,6 +84,27 @@ Public Class DataLayer
         End Try
 
     End Sub
+
+    Private Function IsCnpjUnique(ByVal cnpj As String, ByVal currentCompanyId As Integer) As Boolean
+        Try
+            Using connection As New SqlConnection(connectionString)
+                connection.Open()
+
+                Dim query As New SqlCommand("SELECT COUNT(*) FROM T_COMP WHERE C_CNPJ = @Cnpj AND ID <> @CurrentId", connection)
+                query.Parameters.AddWithValue("@Cnpj", cnpj)
+                query.Parameters.AddWithValue("@CurrentId", currentCompanyId)
+
+                Dim count As Integer = Convert.ToInt32(query.ExecuteScalar())
+
+                Return count = 0
+            End Using
+        Catch ex As Exception
+            MsgBox("Ocorreu um erro ao verificar a unicidade do CNPJ: " & ex.Message, MsgBoxStyle.Exclamation, "Erro")
+            Return False
+        End Try
+    End Function
+
+
     Private Sub AddAssociateRelation(companies As List(Of Company), associateId As Integer)
         Dim query As String = "INSERT INTO T_REL (A_ID, C_ID) VALUES (@a_id, @c_id);"
 
@@ -103,7 +148,7 @@ Public Class DataLayer
 
                 query.ExecuteScalar()
 
-                MsgBox("Update realizado com sucesso", MsgBoxStyle.Information, "Message")
+                MsgBox("Atualização realizada com sucesso", MsgBoxStyle.Information, "Message")
 
                 connection.Close()
             End Using
@@ -126,7 +171,7 @@ Public Class DataLayer
 
                 query.ExecuteNonQuery()
 
-                MsgBox("Update realizado com sucesso", MsgBoxStyle.Information, "Message")
+                MsgBox("Atualização realizada com sucesso", MsgBoxStyle.Information, "Message")
 
                 connection.Close()
             End Using

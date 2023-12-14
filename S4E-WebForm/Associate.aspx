@@ -1,7 +1,9 @@
 ﻿<%@ Page Title="About" Language="VB" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Associate.aspx.vb" Inherits="S4E_WebForm.About" %>
 
+
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
     <main>
+
 		<div>
 			<h1>Cadastro de Associados</h1>
 		</div>
@@ -67,6 +69,11 @@
                         </div>
                     </div>
                 </div>
+            <div style="text-transform: lowercase; font-size: smaller; color: darkred;">
+                *Para utilizar o filtro "Data de Nascimento", use padrão norte americano ao digitar no campo.
+            </div>
+
+
                 <br />
                 <asp:GridView ID="gridViewAssoc" runat="server" Width="80%">
                     <AlternatingRowStyle Font-Size="Medium" />
@@ -83,4 +90,27 @@
 
 		</div>
     </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var radioItem = document.querySelector('[id$=RadioButtonFilters] input[value="birth"]');
+            if (radioItem) {
+                radioItem.addEventListener('mouseover', function () {
+                    // Adicione estilos adicionais aqui, se necessário
+                    this.style.cursor = 'help';
+                });
+            }
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var radioItem = document.querySelector('[id$=RadioButtonFilters] input[value="birth"]');
+            if (radioItem) {
+                $(radioItem).tooltip({
+                    title: 'Utilize o formato americano',
+                    placement: 'top'
+                    // Adicione outras opções conforme necessário
+                });
+            }
+        });
+    </script>
 </asp:Content>

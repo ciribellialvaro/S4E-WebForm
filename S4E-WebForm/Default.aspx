@@ -1,11 +1,11 @@
-﻿<%@ Page Title="Seja Bem Vindo" Language="VB" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Default.aspx.vb" Inherits="S4E_WebForm._Default" %>
+﻿<%@ Page Title="Olá! Obrigado por estar aqui" Language="VB" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Default.aspx.vb" Inherits="S4E_WebForm._Default" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
     <main aria-labelledby="title">
         <h2 id="title"><%: Title %></h2>
 
         <p>
-            Escolha abaixo o cadastro que deseja seguir.
+            Escolha abaixo a opção desejada ou utilize o menu superior.
         </p>
 
         <div>

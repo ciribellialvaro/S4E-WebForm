@@ -176,6 +176,12 @@ Public Class About
         Dim associate As New Associate()
         Dim companies As List(Of Company) = GetCompanies()
 
+        If String.IsNullOrEmpty(txtName.Text) AndAlso String.IsNullOrEmpty(txtCpf.Text) AndAlso String.IsNullOrEmpty(txtBirth.Text) AndAlso (companies Is Nothing OrElse companies.Count = 0) Then
+            ' Nenhum campo preenchido, exibe uma mensagem e sai do método
+            MsgBox("Nenhum campo preenchido. Nenhuma atualização necessária.", MsgBoxStyle.Information, "Aviso")
+            Return
+        End If
+
         associate.Id = assocId
         associate.Name = txtName.Text
         associate.Cpf = txtCpf.Text
@@ -262,6 +268,14 @@ Public Class About
     Protected Sub btnIdFilter1_Click(sender As Object, e As EventArgs) Handles btnIdFilter1.Click
         Dim selectedFilter As String = RadioButtonFilters.SelectedValue
         Dim filterValue As String = txtOtherFilter.Text
+        Dim filterValueIncomplete As String
+
+        If selectedFilter = "birth" Then
+            filterValueIncomplete = "%" + filterValue.Replace("/", "-") + "%"
+        Else
+            filterValueIncomplete = "%" + filterValue + "%"
+        End If
+
         Dim query As String
         If selectedFilter = "name" Then
             query = "SELECT A.Id AS Id, A.A_NAME AS Nome, A.A_CPF AS CPF, A.A_BIRTH AS [Data de Nascimento],
@@ -272,7 +286,7 @@ Public Class About
                             WHERE R.A_ID = A.Id
                             FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 2, '')
                         FROM T_ASSOC A
-                        WHERE A.A_NAME = @filterValue"
+                        WHERE A.A_NAME = @filterValue OR A.A_NAME like @filterValueIncomplete"
         ElseIf selectedFilter = "cpf" Then
             query = "SELECT A.Id AS Id, A.A_NAME AS Nome, A.A_CPF AS CPF, A.A_BIRTH AS [Data de Nascimento],
                         Empresas = STUFF((
@@ -282,7 +296,7 @@ Public Class About
                             WHERE R.A_ID = A.Id
                             FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 2, '')
                         FROM T_ASSOC A
-                        WHERE A.A_CPF = @filterValue"
+                        WHERE A.A_CPF = @filterValue OR A.A_CPF like @filterValueIncomplete"
         Else
             query = "SELECT A.Id AS Id, A.A_NAME AS Nome, A.A_CPF AS CPF, A.A_BIRTH AS [Data de Nascimento],
                         Empresas = STUFF((
@@ -292,13 +306,14 @@ Public Class About
                             WHERE R.A_ID = A.Id
                             FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 2, '')
                         FROM T_ASSOC A
-                        WHERE A.A_BIRTH = @filterValue"
+                        WHERE CONVERT(NVARCHAR(10), A.A_BIRTH, 120) = @filterValue OR  CONVERT(NVARCHAR(10), A.A_BIRTH, 120) like @filterValueIncomplete"
         End If
 
         Using connection As New SqlConnection(connectionString)
             connection.Open()
             Using command As New SqlCommand(query, connection)
                 command.Parameters.AddWithValue("@filterValue", filterValue)
+                command.Parameters.AddWithValue("@filterValueIncomplete", filterValueIncomplete)
                 Dim sd As New SqlDataAdapter(command)
                 Dim dt As New DataTable
                 sd.Fill(dt)
